@@ -464,7 +464,6 @@ static void simple_net(engine::kind engine_kind) {
 extern "C" int cnn_training_f32_cpp() {
     try {
         simple_net(parse_engine_kind(1, NULL));
-        printf("Intel(R) DNNL: cnn_training_f32.cpp: passed\n");
     } catch (error &e) {
         printf("Intel(R) DNNL: cnn_training_f32.cpp: failed!!!\n");
     }

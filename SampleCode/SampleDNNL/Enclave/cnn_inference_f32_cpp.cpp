@@ -55,10 +55,10 @@
 
 #include <assert.h>
 
-#include <chrono>
 #include <numeric>
 #include <vector>
 #include <unordered_map>
+
 
 #include "example_utils.hpp"
 
@@ -798,7 +798,7 @@ extern "C" int cnn_inference_f32_cpp() {
     try {
         int times = 1;   //SGX: change from 100 -> 1
         simple_net(parse_engine_kind(1, NULL), times);
-        printf("Intel(R) DNNL: cnn_inference_f32.cpp: passed\n");
+
     } catch (error &e) {
         printf("Intel(R) DNNL: cnn_inference_f32.cpp: failed!!!\n");
     }
