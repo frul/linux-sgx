@@ -841,7 +841,6 @@ static void simple_net() {
 extern "C" int cpu_rnn_inference_f32_cpp() {
     try {
         simple_net();
-        printf("Intel(R) DNNL: cpu_rnn_inference_f32.cpp: passed\n");
     } catch (error &e) {
         printf("Intel(R) DNNL: cpu_rnn_inference_f32.cpp: failed: status:%d message:%s\n", e.status, e.message);
         return 1;

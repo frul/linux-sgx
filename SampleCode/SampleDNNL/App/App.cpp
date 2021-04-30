@@ -151,7 +151,7 @@ void print_error_message(sgx_status_t ret)
             break;
         }
     }
-    
+
     if (idx == ttl)
     	printf("Error code is 0x%X. Please refer to the \"Intel SGX SDK Developer Reference\" for more details.\n", ret);
 }
@@ -184,66 +184,55 @@ int main(int argc, char* argv[])
 
     cout<<"Intel(R) Deep Neural Network Library (DNNL)" <<endl;
 
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    ret = cnn_inference_f32_cpp(eid, &retval);
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    if(ret != SGX_SUCCESS)
-    {
-        print_error_message(ret);
-    }
-    std::cout << "Inference Time difference = "
-    << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "[nanoseconds]" << std::endl;
 
-    /*ret = cnn_inference_int8_cpp(eid, &retval);
-    if(ret != SGX_SUCCESS)
-    {
-        print_error_message(ret);
-    }*/
+    std::chrono::steady_clock::time_point begin;
+    std::chrono::steady_clock::time_point end;
 
-    begin = std::chrono::steady_clock::now();
+    // First invocation always takes a lot longer
     ret = cnn_training_f32_cpp(eid, &retval);
-    end = std::chrono::steady_clock::now();
-    if(ret != SGX_SUCCESS)
-    {
-        print_error_message(ret);
-    }
-    std::cout << "Training Time difference = "
-              << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "[nanoseconds]" << std::endl;
 
-    /*ret = cpu_cnn_training_f32_c(eid, &retval);
-    if(ret != SGX_SUCCESS)
-    {
-        print_error_message(ret);
+    uint64_t steps = 5;
+    uint64_t duration = 0;
+    for (uint64_t i = 0; i < steps; ++i) {
+        begin = std::chrono::steady_clock::now();
+        ret = cnn_inference_f32_cpp(eid, &retval);
+        end = std::chrono::steady_clock::now();
+        if (ret != SGX_SUCCESS) {
+            print_error_message(ret);
+        }
+        else {
+            duration += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / steps;
+        }
     }
+    std::cout << "Inference time = " << duration << "[nanoseconds]" << std::endl;
 
-    ret = rnn_training_f32_cpp(eid, &retval);
-    if(ret != SGX_SUCCESS)
-    {
-        print_error_message(ret);
+    duration = 0;
+    for (uint64_t i = 0; i < steps; ++i) {
+        begin = std::chrono::steady_clock::now();
+        ret = cnn_training_f32_cpp(eid, &retval);
+        end = std::chrono::steady_clock::now();
+        if (ret != SGX_SUCCESS) {
+            print_error_message(ret);
+        }
+        else {
+            duration += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / steps;
+        }
     }
+    std::cout << "Training time = " << duration << "[nanoseconds]" << std::endl;
 
-    ret = memory_format_propagation(eid, &retval);
-    if(ret != SGX_SUCCESS)
-    {
-        print_error_message(ret);
-        return -1;
+    duration = 0;
+    for (uint64_t i = 0; i < steps; ++i) {
+        begin = std::chrono::steady_clock::now();
+        ret = cpu_rnn_inference_f32_cpp(eid, &retval);
+        end = std::chrono::steady_clock::now();
+        if (ret != SGX_SUCCESS) {
+            print_error_message(ret);
+        }
+        else {
+            duration += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / steps;
+        }
     }
-
-    ret = cpu_rnn_inference_int8_cpp(eid, &retval);
-    if(ret != SGX_SUCCESS)
-    {
-        print_error_message(ret);
-    }*/
-
-    begin = std::chrono::steady_clock::now();
-    ret = cpu_rnn_inference_f32_cpp(eid, &retval);
-    end = std::chrono::steady_clock::now();
-    std::cout << "Inference in Parallel Time difference = "
-              << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "[nanoseconds]" << std::endl;
-    if(ret != SGX_SUCCESS)
-    {
-        print_error_message(ret);
-    }
+    std::cout << "Inference time in parallel = " << duration << "[nanoseconds]" << std::endl;
 
     // Destroy the enclave
     sgx_destroy_enclave(eid);
